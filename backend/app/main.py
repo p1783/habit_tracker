@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_db
+from app.routes import auth, habits, completions
 
 
 app = FastAPI(
@@ -25,12 +26,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
-    """
-    Initialize database tables on application startup.
-
-    For a student project this is acceptable.
-    In production, migrations such as Alembic would be better.
-    """
     init_db()
 
 
@@ -46,4 +41,22 @@ def root() -> dict:
 @app.get("/health")
 def health_check() -> dict:
     return {"status": "ok"}
-  
+
+
+app.include_router(
+    auth.router,
+    prefix=f"{settings.API_V1_STR}/auth",
+    tags=["Auth"],
+)
+
+app.include_router(
+    habits.router,
+    prefix=f"{settings.API_V1_STR}/habits",
+    tags=["Habits"],
+)
+
+app.include_router(
+    completions.router,
+    prefix=f"{settings.API_V1_STR}/completions",
+    tags=["Completions"],
+)
