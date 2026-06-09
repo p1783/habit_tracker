@@ -1,62 +1,58 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.config import settings
-from app.database import init_db
+from app.database import Base, engine
 from app.routes import auth, habits, completions
+from app.exceptions import HabitTrackerException
+from app.handlers import habit_tracker_exception_handler, general_exception_handler
 
+# Create tables
+Base.metadata.create_all(bind=engine)
 
+# Initialize FastAPI app
 app = FastAPI(
-    title=settings.APP_NAME,
-    version=settings.APP_VERSION,
-    description="REST API for Habit Tracker application",
+    title="Habit Tracker API",
+    description="REST API for managing and tracking habits",
+    version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
+# Add exception handlers
+app.add_exception_handler(HabitTrackerException, habit_tracker_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
+
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
-    allow_methods=settings.CORS_ALLOW_METHODS,
-    allow_headers=settings.CORS_ALLOW_HEADERS,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
+# Include routers
+app.include_router(auth.router)
+app.include_router(habits.router)
+app.include_router(completions.router)
 
 
 @app.get("/")
-def root() -> dict:
+def read_root():
+    """Root endpoint with API information"""
     return {
-        "message": "Habit Tracker API",
-        "version": settings.APP_VERSION,
+        "message": "Welcome to Habit Tracker API",
+        "version": "0.1.0",
         "docs": "/docs",
+        "redoc": "/redoc",
+        "status": "online"
     }
 
 
 @app.get("/health")
-def health_check() -> dict:
-    return {"status": "ok"}
-
-
-app.include_router(
-    auth.router,
-    prefix=f"{settings.API_V1_STR}/auth",
-    tags=["Auth"],
-)
-
-app.include_router(
-    habits.router,
-    prefix=f"{settings.API_V1_STR}/habits",
-    tags=["Habits"],
-)
-
-app.include_router(
-    completions.router,
-    prefix=f"{settings.API_V1_STR}/completions",
-    tags=["Completions"],
-)
+def health_check():
+    """Health check endpoint for monitoring"""
+    return {
+        "status": "ok",
+        "version": "0.1.0"
+    }
