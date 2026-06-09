@@ -1,39 +1,63 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.database import get_db
-from app.schemas import UserCreate, UserLogin, UserResponse
-from app.schemas.user import TokenResponse
-from app.services import UserService
-from app.auth.security import create_access_token
+from app.models.user import User
+from app.schemas.user import UserCreate, UserLogin, UserResponse
+from app.schemas.token import Token
+from app.services.user_service import UserService
+from app.auth.security import verify_password, create_access_token
+from app.exceptions import InvalidCredentials, UserAlreadyExists
 
-
-router = APIRouter()
+router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    if UserService.get_user_by_email(db, user_data.email):
+    """
+    Register a new user
+    
+    Returns:
+        UserResponse: Created user data
+    
+    Raises:
+        400: Email already registered or username already taken
+    """
+    try:
+        user = UserService.create_user(db, user_data)
+        return user
+    except Exception as e:
+        if "email" in str(e).lower():
+            raise UserAlreadyExists("Email")
+        elif "username" in str(e).lower():
+            raise UserAlreadyExists("Username")
+        raise
+
+
+@router.post("/login", response_model=Token)
+def login(user_data: UserLogin, db: Session = Depends(get_db)):
+    """
+    Login user and get access token
+    
+    Returns:
+        Token: Access token for authentication
+    
+    Raises:
+        401: Invalid credentials
+        403: User account is inactive
+    """
+    user = UserService.get_user_by_email(db, user_data.email)
+    
+    if not user or not verify_password(user_data.password, user.hashed_password):
+        raise InvalidCredentials()
+    
+    if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive",
         )
-
-    if UserService.get_user_by_username(db, user_data.username):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this username already exists",
-        )
-
-    return UserService.create_user(db, user_data)
-
-
-@router.post("/login", response_model=TokenResponse)
-def login(login_data: UserLogin, db: Session = Depends(get_db)):
-    user = UserService.authenticate_user(
-        db=db,
-        email=login_data.email,
-        password=login_data.password,
+    
+    access_token = create_access_token(user_id=user.id)
+    return {"access_token": access_token, "token_type": "bearer"}
     )
 
     if not user:
