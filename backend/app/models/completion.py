@@ -1,7 +1,9 @@
-from sqlalchemy import Column, String, DateTime, Date, ForeignKey, Boolean
+from sqlalchemy import Column, String, DateTime, Date, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime
+
 from app.database import Base
+
 
 class Completion(Base):
     __tablename__ = "completions"
@@ -16,3 +18,7 @@ class Completion(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     habit = relationship("Habit", back_populates="completions")
+
+    __table_args__ = (
+        UniqueConstraint("habit_id", "completion_date", name="uq_habit_completion_date"),
+    )
