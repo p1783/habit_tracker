@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
+
+from app.auth.dependencies import get_current_user
 from app.database import get_db
+from app.exceptions import HabitNotFound
 from app.models.user import User
-from app.schemas.habit import HabitCreate, HabitUpdate, HabitResponse
+from app.schemas.habit import HabitCreate, HabitResponse, HabitUpdate
 from app.services.habit_service import HabitService
-from app.auth.security import get_current_user
-from app.exceptions import HabitNotFound, PermissionDenied
 
 router = APIRouter(prefix="/api/habits", tags=["habits"])
 
@@ -16,20 +19,16 @@ def create_habit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new habit for the current user"""
-    habit = HabitService.create_habit(db, current_user.id, habit_data)
-    return habit
+    return HabitService.create_habit(db, current_user.id, habit_data)
 
 
 @router.get("", response_model=list[HabitResponse])
 def get_habits(
-    is_active: bool = Query(None),
+    is_active: Optional[bool] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all habits for current user with optional filtering"""
-    habits = HabitService.get_user_habits(db, current_user.id, is_active)
-    return habits
+    return HabitService.get_user_habits(db, current_user.id, is_active)
 
 
 @router.get("/search", response_model=list[HabitResponse])
@@ -38,9 +37,7 @@ def search_habits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Search habits by name"""
-    habits = HabitService.search_habits(db, current_user.id, query)
-    return habits
+    return HabitService.search_habits(db, current_user.id, query)
 
 
 @router.get("/{habit_id}", response_model=HabitResponse)
@@ -49,10 +46,11 @@ def get_habit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get a specific habit"""
     habit = HabitService.get_habit_by_id(db, habit_id, current_user.id)
+
     if not habit:
         raise HabitNotFound()
+
     return habit
 
 
@@ -63,13 +61,12 @@ def update_habit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a habit"""
     habit = HabitService.get_habit_by_id(db, habit_id, current_user.id)
+
     if not habit:
         raise HabitNotFound()
-    
-    habit = HabitService.update_habit(db, habit, habit_data)
-    return habit
+
+    return HabitService.update_habit(db, habit, habit_data)
 
 
 @router.delete("/{habit_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -78,10 +75,10 @@ def delete_habit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a habit"""
     habit = HabitService.get_habit_by_id(db, habit_id, current_user.id)
+
     if not habit:
         raise HabitNotFound()
-    
+
     HabitService.delete_habit(db, habit)
     return None
