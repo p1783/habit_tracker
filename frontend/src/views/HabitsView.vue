@@ -237,7 +237,7 @@
           <div class="grid grid-cols-2 gap-3 mt-4">
             <div class="bg-purple-50 rounded-2xl p-3">
               <p class="text-xs text-gray-500">🔥 Seria</p>
-              <p class="font-bold text-gray-900">{{ streak(habit.id) }} dni</p>
+              <p class="font-bold text-gray-900">{{ currentStreak(habit.id) }} dni</p>
             </div>
 
             <div class="bg-purple-50 rounded-2xl p-3">
@@ -453,7 +453,7 @@ const lastSevenDays = computed(() => {
 
 const bestStreak = computed(() => {
   if (habits.value.length === 0) return 0;
-  return Math.max(...habits.value.map((habit) => streak(habit.id)), 0);
+  return Math.max(...habits.value.map((habit) => bestStreakForHabit(habit.id)), 0);
 });
 
 const showMessage = (text: string) => {
@@ -523,7 +523,7 @@ const monthProgress = (habitId: string) => {
   return Math.round((done / 30) * 100);
 };
 
-const streak = (habitId: string) => {
+const currentStreak = (habitId: string) => {
   let result = 0;
   const completionsForHabit = completionMap.value[habitId] || [];
 
@@ -541,6 +541,35 @@ const streak = (habitId: string) => {
   }
 
   return result;
+};
+
+const bestStreakForHabit = (habitId: string) => {
+  const completionsForHabit = completionMap.value[habitId] || [];
+  const completedDates = completionsForHabit
+    .map((completion) => completion.completion_date)
+    .sort();
+
+  if (completedDates.length === 0) return 0;
+
+  let best = 1;
+  let current = 1;
+
+  for (let i = 1; i < completedDates.length; i++) {
+    const previous = new Date(completedDates[i - 1]);
+    const currentDate = new Date(completedDates[i]);
+
+    const diffInDays =
+      (currentDate.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffInDays === 1) {
+      current++;
+      best = Math.max(best, current);
+    } else {
+      current = 1;
+    }
+  }
+
+  return best;
 };
 
 const selectDateForHabit = (habitId: string, date: string) => {
