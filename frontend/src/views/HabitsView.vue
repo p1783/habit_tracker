@@ -1,47 +1,56 @@
 <template>
   <div class="max-w-7xl mx-auto">
-    <div class="mb-8">
+    <section class="mb-8">
       <p class="text-sm font-semibold text-purple-600 mb-2">Panel zarządzania nawykami</p>
 
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 class="text-4xl font-bold text-gray-900">Moje nawyki</h1>
           <p class="text-gray-600 mt-2">
-            Dodawaj nawyki, oznaczaj wykonanie w wybranych dniach i analizuj historię.
+            Monitoruj postępy, oznaczaj wykonanie w wybranych dniach i analizuj historię.
           </p>
         </div>
 
         <button
           @click="showAddForm = !showAddForm"
-          class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 shadow-md"
+          class="bg-purple-600 text-white px-6 py-3 rounded-2xl hover:bg-purple-700 shadow-md transition hover:scale-[1.02]"
         >
           + Dodaj nawyk
         </button>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white rounded-3xl shadow-lg p-6 mb-8 border border-purple-100">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+    <section class="bg-white rounded-3xl shadow-lg p-6 mb-8 border border-purple-100">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
         <div>
           <p class="text-sm font-semibold text-purple-600">Dzisiejsze zadania</p>
           <h2 class="text-2xl font-bold text-gray-900">
             {{ completedTodayCount }} z {{ activeCount }} wykonane
           </h2>
+          <p class="text-gray-500 text-sm mt-1">
+            {{ todayLabel }}
+          </p>
         </div>
 
-        <div class="w-full md:w-64 bg-purple-100 rounded-full h-4 overflow-hidden">
-          <div
-            class="bg-purple-600 h-4 rounded-full transition-all"
-            :style="{ width: todayProgress + '%' }"
-          ></div>
+        <div class="w-full lg:w-72">
+          <div class="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Postęp dnia</span>
+            <span>{{ todayProgress }}%</span>
+          </div>
+          <div class="w-full bg-purple-100 rounded-full h-4 overflow-hidden">
+            <div
+              class="bg-purple-600 h-4 rounded-full transition-all"
+              :style="{ width: todayProgress + '%' }"
+            ></div>
+          </div>
         </div>
       </div>
 
-      <div v-if="activeHabits.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div v-if="activeHabits.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         <div
           v-for="habit in activeHabits"
           :key="habit.id"
-          class="flex items-center justify-between bg-purple-50 rounded-2xl p-4"
+          class="flex items-center justify-between bg-purple-50 rounded-2xl p-4 border border-purple-100"
         >
           <div>
             <p class="font-semibold text-gray-900">{{ habit.name }}</p>
@@ -54,17 +63,17 @@
             @click="quickCompleteToday(habit.id)"
             :disabled="isCompletedToday(habit.id)"
             :class="isCompletedToday(habit.id) ? 'bg-green-500' : 'bg-purple-600 hover:bg-purple-700'"
-            class="text-white px-4 py-2 rounded-xl disabled:opacity-80"
+            class="text-white px-4 py-2 rounded-xl disabled:opacity-80 transition"
           >
             {{ isCompletedToday(habit.id) ? "✓" : "Oznacz" }}
           </button>
         </div>
       </div>
 
-      <p v-else class="text-gray-500">Brak aktywnych nawyków.</p>
-    </div>
+      <p v-else class="text-gray-500">Brak aktywnych nawyków na dziś.</p>
+    </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-2xl shadow p-5 border border-purple-50">
         <p class="text-gray-500 text-sm">📋 Wszystkie</p>
         <p class="text-3xl font-bold text-gray-900">{{ habits.length }}</p>
@@ -81,12 +90,12 @@
       </div>
 
       <div class="bg-white rounded-2xl shadow p-5 border border-purple-50">
-        <p class="text-gray-500 text-sm">📈 Postęp dnia</p>
-        <p class="text-3xl font-bold text-purple-600">{{ todayProgress }}%</p>
+        <p class="text-gray-500 text-sm">🏆 Najlepsza seria</p>
+        <p class="text-3xl font-bold text-purple-600">{{ bestStreak }} dni</p>
       </div>
-    </div>
+    </section>
 
-    <div v-if="showAddForm" class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-100">
+    <section v-if="showAddForm" class="bg-white p-6 rounded-3xl shadow-md mb-8 border border-purple-100">
       <h2 class="text-2xl font-semibold mb-4">Utwórz nowy nawyk</h2>
 
       <form @submit.prevent="addHabit" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -95,7 +104,7 @@
           <input
             v-model="newHabit.name"
             type="text"
-            placeholder="np. Wypić wodę"
+            placeholder="np. 10k kroków"
             class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-purple-600"
             required
           />
@@ -121,9 +130,9 @@
           </button>
         </div>
       </form>
-    </div>
+    </section>
 
-    <div class="bg-white p-5 rounded-2xl shadow-md mb-8 border border-purple-100">
+    <section class="bg-white p-5 rounded-3xl shadow-md mb-8 border border-purple-100">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input
           v-model="searchQuery"
@@ -144,10 +153,10 @@
         </select>
 
         <button @click="loadAll" class="bg-purple-50 text-purple-700 px-4 py-3 rounded-xl hover:bg-purple-100">
-          Odśwież
+          Odśwież dane
         </button>
       </div>
-    </div>
+    </section>
 
     <div v-if="message" class="bg-green-100 text-green-800 p-4 rounded-xl mb-6">
       {{ message }}
@@ -161,11 +170,11 @@
       Ładowanie nawyków...
     </div>
 
-    <div v-else-if="habits.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div
+    <section v-else-if="habits.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <article
         v-for="habit in habits"
         :key="habit.id"
-        class="bg-white rounded-3xl shadow-md p-6 border border-purple-100 hover:shadow-lg transition"
+        class="bg-white rounded-3xl shadow-md p-6 border border-purple-100 hover:shadow-xl transition"
       >
         <div class="flex items-start justify-between gap-4 mb-4">
           <div>
@@ -183,7 +192,7 @@
           </span>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-5">
           <div class="flex justify-between text-sm text-gray-600 mb-2">
             <span>Postęp ostatnich 7 dni</span>
             <span>{{ habitProgress(habit.id).done }} / 7 dni</span>
@@ -191,30 +200,51 @@
 
           <div class="w-full bg-purple-100 rounded-full h-3 overflow-hidden mb-3">
             <div
-              class="bg-purple-600 h-3 rounded-full"
+              class="bg-purple-600 h-3 rounded-full transition-all"
               :style="{ width: habitProgress(habit.id).percent + '%' }"
             ></div>
           </div>
 
           <div class="flex justify-between gap-1">
-            <div
+            <button
               v-for="day in lastSevenDays"
               :key="`${habit.id}-${day.date}`"
-              class="flex flex-col items-center gap-1"
+              @click="selectDateForHabit(habit.id, day.date)"
+              :class="[
+                isCompletedOnDate(habit.id, day.date)
+                  ? 'bg-purple-600 text-white'
+                  : selectedDates[habit.id] === day.date
+                    ? 'bg-purple-300 text-purple-900'
+                    : 'bg-purple-100 text-purple-700',
+              ]"
+              class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition hover:scale-105"
+              :title="day.date"
             >
-              <div
-                :class="isCompletedOnDate(habit.id, day.date) ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'"
-                class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              >
-                {{ isCompletedOnDate(habit.id, day.date) ? "✓" : "○" }}
-              </div>
-              <span class="text-[10px] text-gray-500">{{ day.label }}</span>
-            </div>
+              {{ isCompletedOnDate(habit.id, day.date) ? "✓" : "○" }}
+            </button>
           </div>
 
-          <p class="text-sm text-gray-600 mt-3">
-            🔥 Seria: <span class="font-semibold">{{ streak(habit.id) }}</span> dni
-          </p>
+          <div class="flex justify-between mt-1">
+            <span
+              v-for="day in lastSevenDays"
+              :key="`${habit.id}-${day.date}-label`"
+              class="text-[10px] text-gray-500 w-10 text-center"
+            >
+              {{ day.label }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div class="bg-purple-50 rounded-2xl p-3">
+              <p class="text-xs text-gray-500">🔥 Seria</p>
+              <p class="font-bold text-gray-900">{{ streak(habit.id) }} dni</p>
+            </div>
+
+            <div class="bg-purple-50 rounded-2xl p-3">
+              <p class="text-xs text-gray-500">📈 30 dni</p>
+              <p class="font-bold text-gray-900">{{ monthProgress(habit.id) }}%</p>
+            </div>
+          </div>
         </div>
 
         <div class="bg-purple-50 rounded-2xl p-4 mb-4">
@@ -242,38 +272,40 @@
 
           <button
             @click="markComplete(habit.id)"
-            class="w-full mt-4 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700"
+            class="w-full mt-4 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition"
           >
             Oznacz jako wykonany
           </button>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <button @click="toggleActive(habit)" class="bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600">
+          <button @click="toggleActive(habit)" class="bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition">
             {{ habit.is_active ? "Dezaktywuj" : "Aktywuj" }}
           </button>
 
-          <button @click="viewHistory(habit)" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+          <button @click="viewHistory(habit)" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
             Historia
           </button>
 
-          <button @click="startEdit(habit)" class="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700">
+          <button @click="startEdit(habit)" class="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition">
             Edytuj
           </button>
 
-          <button @click="deleteHabit(habit.id)" class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700">
+          <button @click="deleteHabit(habit.id)" class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition">
             Usuń
           </button>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
 
-    <div v-else class="bg-white rounded-3xl shadow p-12 text-center">
-      <p class="text-gray-600 text-lg mb-4">Nie znaleziono nawyków.</p>
+    <section v-else class="bg-white rounded-3xl shadow p-12 text-center">
+      <p class="text-6xl mb-4">🌱</p>
+      <p class="text-gray-700 text-xl font-semibold mb-2">Nie masz jeszcze żadnych nawyków.</p>
+      <p class="text-gray-500 mb-6">Dodaj pierwszy i zacznij budować swoją serię.</p>
       <button @click="showAddForm = true" class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700">
         Utwórz pierwszy nawyk
       </button>
-    </div>
+    </section>
 
     <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white p-8 rounded-3xl max-w-md w-full">
@@ -320,10 +352,14 @@
           <div
             v-for="completion in completions"
             :key="completion.id"
-            class="border border-green-100 bg-green-50 rounded-xl p-4"
+            class="relative border-l-4 border-purple-500 bg-purple-50 rounded-xl p-4 pl-5"
           >
-            <p class="font-bold text-green-800">
-              {{ completion.completion_date }}
+            <p class="font-bold text-purple-900">
+              ● {{ formatDate(completion.completion_date) }}
+            </p>
+
+            <p class="text-sm text-green-700 mt-1">
+              ✓ wykonano
             </p>
 
             <p v-if="completion.notes" class="text-gray-700 mt-1">
@@ -369,6 +405,13 @@ const message = ref("");
 
 const today = new Date().toISOString().split("T")[0];
 
+const todayLabel = new Date().toLocaleDateString("pl-PL", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
 const newHabit = ref({
   name: "",
   description: "",
@@ -406,6 +449,11 @@ const lastSevenDays = computed(() => {
   }
 
   return days;
+});
+
+const bestStreak = computed(() => {
+  if (habits.value.length === 0) return 0;
+  return Math.max(...habits.value.map((habit) => streak(habit.id)), 0);
 });
 
 const showMessage = (text: string) => {
@@ -458,6 +506,23 @@ const habitProgress = (habitId: string) => {
   };
 };
 
+const monthProgress = (habitId: string) => {
+  const completionsForHabit = completionMap.value[habitId] || [];
+  let done = 0;
+
+  for (let i = 0; i < 30; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const value = date.toISOString().split("T")[0];
+
+    if (completionsForHabit.some((completion) => completion.completion_date === value)) {
+      done++;
+    }
+  }
+
+  return Math.round((done / 30) * 100);
+};
+
 const streak = (habitId: string) => {
   let result = 0;
   const completionsForHabit = completionMap.value[habitId] || [];
@@ -478,6 +543,10 @@ const streak = (habitId: string) => {
   return result;
 };
 
+const selectDateForHabit = (habitId: string, date: string) => {
+  selectedDates.value[habitId] = date;
+};
+
 const addHabit = async () => {
   await habitStore.createHabit(newHabit.value);
   newHabit.value = { name: "", description: "" };
@@ -491,6 +560,11 @@ const markComplete = async (habitId: string) => {
 
   if (selectedDate > today) {
     alert("Nie można oznaczać nawyków dla przyszłych dni.");
+    return;
+  }
+
+  if (isCompletedOnDate(habitId, selectedDate)) {
+    alert("Ten nawyk jest już oznaczony jako wykonany dla tego dnia.");
     return;
   }
 
@@ -583,6 +657,14 @@ const loadHistory = async () => {
     historyStartDate.value || undefined,
     historyEndDate.value || undefined
   );
+};
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString("pl-PL", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 };
 
 onMounted(async () => {

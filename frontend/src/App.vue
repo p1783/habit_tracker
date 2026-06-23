@@ -1,13 +1,15 @@
 <template>
   <div id="app" class="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-white">
-    <nav class="bg-white/90 shadow-sm border-b border-purple-100">
+    <nav class="bg-white/90 shadow-sm border-b border-purple-100 sticky top-0 z-40 backdrop-blur">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-purple-700">📅 Habit Tracker</h1>
+          <router-link to="/" class="text-2xl font-bold text-purple-700">
+            📅 Habit Tracker
+          </router-link>
 
           <div class="flex gap-4 items-center">
             <router-link v-if="isAuthenticated" to="/" class="text-gray-600 hover:text-purple-700">
-              Start
+              Dashboard
             </router-link>
 
             <router-link v-if="isAuthenticated" to="/habits" class="text-gray-600 hover:text-purple-700">
