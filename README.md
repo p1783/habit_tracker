@@ -264,3 +264,5 @@ Dokumentacja zawiera między innymi:
 Projekt został przygotowany wyłącznie w celach edukacyjnych jako projekt zaliczeniowy na potrzeby przedmiotu:
 
 **Architektura i komunikacja między systemami i bazami danych**
+
+Autorzy opisani w osobnym pliku PDF dołączonym do projektu.
