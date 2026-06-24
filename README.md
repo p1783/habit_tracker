@@ -237,19 +237,6 @@ Najważniejsze elementy interfejsu:
 
 ---
 
-# Przykładowe ekrany aplikacji
-
-> *(w tym miejscu można umieścić zrzuty ekranu aplikacji)*
-
-- ekran logowania,
-- rejestracja,
-- dashboard,
-- lista nawyków,
-- historia realizacji,
-- Swagger UI.
-
----
-
 # Repozytorium
 
 Projekt rozwijany był z wykorzystaniem systemu kontroli wersji **Git** oraz repozytorium **GitHub**.
